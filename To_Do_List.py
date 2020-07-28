@@ -107,7 +107,7 @@ def all_task(count):
         if len(all_rows) == 0:
             print("Nothing to do!")
         else:
-            print("All tasks:")
+
             i = 1
             for taks in all_rows:
                 print(f"{i}. {taks[0]}. {taks[1].strftime('%d').replace('0','')} {taks[1].strftime('%b')}")
@@ -117,6 +117,35 @@ def all_task(count):
         pass
     print()
 
+def missed_task():
+    """
+    prints all tasks whose deadline was missed, that is, tasks whose deadline date is earlier than today's date
+    :return:
+    """
+    today_is = datetime.today().date()
+    missed = session.query(Table.task, Table.deadline).filter(Table.deadline < today_is).order_by(Table.deadline).all()
+    i = 1
+    for taks in missed:
+        print(f"{i}. {taks[0]}. {taks[1].strftime('%d').replace('0', '')} {taks[1].strftime('%b')}")
+        i += 1
+    print()
+
+def delete_task():
+    """
+    deletes the chosen task. Print 'Nothing to delete' if the tasks list is empty.
+    :return:
+    """
+    print("Chose the number of the task you want to delete:")
+    all_task('all')
+    rows = session.query(Table).order_by(Table.deadline).all()
+    if rows:
+        choose_del = int(input())-1
+        specific_row = rows[choose_del]
+        session.delete(specific_row)
+        session.commit()
+        print("The task has been deleted!")
+    else:
+        print("Nothing to delete")
 
 def main_menu():
     """
@@ -126,7 +155,9 @@ def main_menu():
     print("1) Today's tasks")
     print("2) Week's tasks")
     print("3) All tasks")
-    print("4) Add task")
+    print("4) Missed tasks")
+    print("5) Add task")
+    print("6) Delete task")
     print("0) Exit")
     choose = input()
     print()
@@ -135,9 +166,14 @@ def main_menu():
     elif choose == '2':
         week_task()
     elif choose == '3':
+        print("All tasks:")
         all_task("all")
     elif choose == '4':
+        missed_task()
+    elif choose == '5':
         add_task()
+    elif choose == '6':
+        delete_task()
     elif choose == '0':
         exit()
 
